@@ -5,6 +5,8 @@ require('dotenv').config()
 const authRoutes = require('./routes/auth.routes')
 const userRoutes = require('./routes/users.routes')
 const submissionRoutes = require('./routes/submissions.routes')
+const dashboardRoutes = require('./routes/dashboard.routes')
+const noticeRoutes = require('./routes/notices.routes')
 
 const app = express()
 
@@ -14,6 +16,8 @@ app.use(express.json())
 app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/submissions', submissionRoutes)
+app.use('/api/dashboard', dashboardRoutes)
+app.use('/api/notices', noticeRoutes)
 
 app.get('/', (req, res) => {
   res.json({ message: 'Server is running' })
