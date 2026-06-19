@@ -80,5 +80,28 @@ const toggleRole = async (req, res) => {
     res.status(500).json({ message: 'Server error' })
   }
 }
+const changePassword = async (req, res) => {
+  const { current_password, new_password } = req.body
+  const user_id = req.user.id
 
-module.exports = { createUser, activateUser, toggleRole }
+  try {
+    const result = await pool.query('SELECT * FROM users WHERE id = $1', [user_id])
+    const user = result.rows[0]
+
+    const isMatch = await bcrypt.compare(current_password, user.password)
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Current password is wrong' })
+    }
+
+    const hashed = await bcrypt.hash(new_password, 10)
+    await pool.query('UPDATE users SET password = $1 WHERE id = $2', [hashed, user_id])
+
+    res.json({ message: 'Password changed successfully' })
+
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: 'Server error' })
+  }
+}
+
+module.exports = { createUser, activateUser, toggleRole, changePassword }

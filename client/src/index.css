@@ -2,3 +2,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+.react-calendar-heatmap .color-empty { fill: #374151; }
+.react-calendar-heatmap .color-scale-1 { fill: #37f67a; }
+.react-calendar-heatmap .color-scale-2 { fill: #4ade80; }
+.react-calendar-heatmap .color-scale-3 { fill: #16a34a; }
+.react-calendar-heatmap .color-scale-4 { fill: #14562e; }
+.react-calendar-heatmap text { fill: #9ca3af; font-size: 8px; }
