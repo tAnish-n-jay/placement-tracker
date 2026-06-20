@@ -8,6 +8,40 @@ const STATUS_STYLES = {
   rejected: 'bg-red-900 text-red-400'
 }
 
+function FileLinks({ urls }) {
+  let parsedUrls = []
+  try {
+    parsedUrls = JSON.parse(urls)
+  } catch {
+    parsedUrls = [urls]
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2 mt-2">
+      {parsedUrls.map((url, i) => {
+        const isPDF = url.includes('.pdf')
+        const isWord = url.includes('.doc')
+        const label = isPDF ? '📄 PDF' : isWord ? '📝 Word' : '🖼️ Image'
+        const openUrl = isPDF || isWord
+          ? `https://docs.google.com/viewer?url=${encodeURIComponent(url)}`
+          : url
+
+        return (
+          <a
+          key = { i }
+            href = { openUrl }
+        target = "_blank"
+        rel = "noopener noreferrer"
+        className = "text-blue-400 text-sm hover:underline bg-gray-700 px-3 py-1 rounded-full"
+          >
+          { label } { i + 1 } →
+    </a>
+  )
+})}
+    </div >
+  )
+}
+
 export default function HistoryPage() {
   const [submissions, setSubmissions] = useState([])
   const [loading, setLoading] = useState(true)
@@ -59,8 +93,8 @@ export default function HistoryPage() {
                       </span>
                     )}
                   </div>
-                  <span className={`text-xs px-3 py-1 rounded-full font-medium ${STATUS_STYLES[sub.status] || 'bg-gray-700 text-gray-300'}`}>
-                    {sub.status ? sub.status.toUpperCase() : 'UNKNOWN'}
+                  <span className={`text-xs px-3 py-1 rounded-full font-medium ${STATUS_STYLES[sub.status]}`}>
+                    {sub.status.toUpperCase()}
                   </span>
                 </div>
 
@@ -81,14 +115,7 @@ export default function HistoryPage() {
                 )}
 
                 {sub.screenshot_url && (
-                  <a
-                    href={sub.screenshot_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-400 text-sm hover:underline"
-                  >
-                    View Screenshot →
-                  </a>
+                  <FileLinks urls={sub.screenshot_url} />
                 )}
 
                 <p className="text-gray-600 text-xs mt-3">

@@ -4,6 +4,8 @@ import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import SubmitPage from './pages/SubmitPage'
 import HistoryPage from './pages/HistoryPage'
+import SupervisorPage from './pages/SupervisorPage'
+import AdminPage from './pages/AdminPage'
 
 const ProtectedRoute = ({ children, roles }) => {
   const { user, loading } = useAuth()
@@ -32,6 +34,16 @@ function App() {
       <Route path="/history" element={
         <ProtectedRoute>
           <HistoryPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/supervisor" element={
+        <ProtectedRoute roles={['supervisor', 'admin', 'founder']}>
+          <SupervisorPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin" element={
+        <ProtectedRoute roles={['admin', 'founder']}>
+          <AdminPage />
         </ProtectedRoute>
       } />
       <Route path="/" element={<Navigate to="/dashboard" />} />

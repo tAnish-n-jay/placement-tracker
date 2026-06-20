@@ -103,5 +103,26 @@ const changePassword = async (req, res) => {
     res.status(500).json({ message: 'Server error' })
   }
 }
+const getAllUsers = async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT id, name, email, role, is_active, created_at FROM users ORDER BY created_at DESC'
+    )
+    res.json({ users: result.rows })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: 'Server error' })
+  }
+}
 
-module.exports = { createUser, activateUser, toggleRole, changePassword }
+const deleteUser = async (req, res) => {
+  const { id } = req.params
+  try {
+    await pool.query('DELETE FROM users WHERE id = $1', [id])
+    res.json({ message: 'User deleted' })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: 'Server error' })
+  }
+}
+module.exports = { createUser, activateUser, toggleRole, changePassword, getAllUsers, deleteUser }

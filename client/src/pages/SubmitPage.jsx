@@ -10,39 +10,39 @@ export default function SubmitPage() {
   const [language, setLanguage] = useState('')
   const [questionsSolved, setQuestionsSolved] = useState('')
   const [remarks, setRemarks] = useState('')
-  const [screenshot, setScreenshot] = useState(null)
+  const [screenshots, setScreenshots] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-    setSuccess('')
+  e.preventDefault()
+  setLoading(true)
+  setError('')
+  setSuccess('')
 
-    try {
-      const formData = new FormData()
-      formData.append('subject', subject)
-      formData.append('language', language)
-      formData.append('questions_solved', questionsSolved)
-      formData.append('remarks', remarks)
-      if (screenshot) formData.append('screenshot', screenshot)
+  try {
+    const formData = new FormData()
+    formData.append('subject', subject)
+    formData.append('language', language)
+    formData.append('questions_solved', questionsSolved)
+    formData.append('remarks', remarks)
+    screenshots.forEach(file => formData.append('screenshots', file))
 
-      await api.post('/submissions/create', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
+    await api.post('/submissions/create', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
 
-      setSuccess('Submission sent! Waiting for supervisor approval.')
-      setTimeout(() => navigate('/dashboard'), 2000)
+    setSuccess('Submission sent! Waiting for supervisor approval.')
+    setTimeout(() => navigate('/dashboard'), 2000)
 
-    } catch (err) {
-      setError(err.response?.data?.message || 'Submission failed')
-    } finally {
-      setLoading(false)
-    }
+  } catch (err) {
+    setError(err.response?.data?.message || 'Submission failed')
+  } finally {
+    setLoading(false)
   }
+}
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -113,15 +113,20 @@ export default function SubmitPage() {
           </div>
 
           <div>
-            <label className="text-gray-400 text-sm mb-1 block">Screenshot Proof</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setScreenshot(e.target.files[0])}
-              className="w-full bg-gray-700 text-white p-3 rounded-lg outline-none"
-              required
-            />
-          </div>
+  <label className="text-gray-400 text-sm mb-1 block">
+    Upload Files (images — max 5 files)
+  </label>
+  <input
+    type="file"
+    accept="image/*"
+    multiple
+    onChange={(e) => setScreenshots(Array.from(e.target.files))}
+    className="w-full bg-gray-700 text-white p-3 rounded-lg outline-none"
+  />
+  {screenshots.length > 0 && (
+    <p className="text-gray-400 text-xs mt-1">{screenshots.length} file(s) selected</p>
+  )}
+</div>
 
           <button
             type="submit"

@@ -3,13 +3,25 @@ const pool = require('../config/db')
 const createSubmission = async (req, res) => {
   const { subject, language, questions_solved, remarks } = req.body
   const user_id = req.user.id
-  const screenshot_url = req.file ? req.file.path : null
 
   try {
+    const screenshot_urls = req.files ? req.files.map(f => {
+      // For PDFs and Word docs, fix the URL to be directly openable
+      const isPDF = f.mimetype === 'application/pdf'
+      const isWord = f.mimetype === 'application/msword' ||
+        f.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+
+      if (isPDF || isWord) {
+        // Replace /image/upload/ with /raw/upload/ in the URL
+        return f.path.replace('/image/upload/', '/raw/upload/')
+      }
+      return f.path
+    }) : []
+
     const result = await pool.query(
       `INSERT INTO submissions (user_id, subject, language, questions_solved, screenshot_url, status)
        VALUES ($1, $2, $3, $4, $5, 'pending') RETURNING *`,
-      [user_id, subject, language, questions_solved, screenshot_url]
+      [user_id, subject, language, questions_solved, JSON.stringify(screenshot_urls)]
     )
 
     res.status(201).json({ message: 'Submission created', submission: result.rows[0] })
@@ -19,7 +31,6 @@ const createSubmission = async (req, res) => {
     res.status(500).json({ message: 'Server error' })
   }
 }
-
 const getPending = async (req, res) => {
   try {
     const result = await pool.query(

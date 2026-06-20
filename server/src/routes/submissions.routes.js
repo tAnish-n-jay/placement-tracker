@@ -4,7 +4,7 @@ const { createSubmission, getPending, approveSubmission, rejectSubmission, getMy
 const { authenticate, requireRole } = require('../middleware/auth.middleware')
 const upload = require('../middleware/upload.middleware')
 
-router.post('/create', authenticate, requireRole('member'), upload.single('screenshot'), createSubmission)
+router.post('/create', authenticate, requireRole('member'), upload.array('screenshots', 5), createSubmission)
 router.get('/pending', authenticate, requireRole('supervisor', 'admin', 'founder'), getPending)
 router.patch('/:id/approve', authenticate, requireRole('supervisor', 'admin', 'founder'), approveSubmission)
 router.patch('/:id/reject', authenticate, requireRole('supervisor', 'admin', 'founder'), rejectSubmission)
