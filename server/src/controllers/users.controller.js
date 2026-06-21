@@ -1,11 +1,11 @@
 const pool = require('../config/db')
 const bcrypt = require('bcrypt')
+const { sendWelcomeEmail, sendActivationEmail } = require('../services/email.service')
 
 const createUser = async (req, res) => {
   const { name, email, password, role } = req.body
 
   try {
-    // Check if email already exists
     const existing = await pool.query('SELECT id FROM users WHERE email = $1', [email])
     if (existing.rows.length > 0) {
       return res.status(400).json({ message: 'Email already exists' })
@@ -18,6 +18,15 @@ const createUser = async (req, res) => {
        VALUES ($1, $2, $3, $4, false) RETURNING id, name, email, role, is_active`,
       [name, email, hashedPassword, role || 'member']
     )
+
+    // Send welcome email with credentials
+    try {
+      console.log('Sending welcome email to:', email)
+      await sendWelcomeEmail({ name, email, password, role: role || 'member' })
+    } catch (emailErr) {
+      console.error('Email failed:', emailErr.message)
+      // Don't fail the request if email fails
+    }
 
     res.status(201).json({ message: 'User created', user: result.rows[0] })
 
@@ -38,6 +47,16 @@ const activateUser = async (req, res) => {
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: 'User not found' })
+    }
+
+    // Send activation email
+    try {
+      await sendActivationEmail({
+        name: result.rows[0].name,
+        email: result.rows[0].email
+      })
+    } catch (emailErr) {
+      console.error('Email failed:', emailErr.message)
     }
 
     res.json({ message: 'User activated', user: result.rows[0] })
